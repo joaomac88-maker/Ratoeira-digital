@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Corrida do Queijo - Ratoeira Digital</title>
+  
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      background: #12121c;
+      color: #f0f0f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      overflow-x: hidden;
+      text-align: center;
+      padding: 16px 12px 28px 12px;
+    }
+
+    .header-container {
+      margin-top: 4px;
+      margin-bottom: 12px;
+      max-width: 440px;
+      width: 100%;
+    }
+
+    h1 { 
+      font-size: 1.8rem; 
+      margin-bottom: 4px; 
+      color: #ffca28;
+      text-shadow: 0 0 15px rgba(255, 202, 40, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    p.instructions { 
+      font-size: 0.82rem; 
+      color: #9d9db5; 
+      line-height: 1.35;
+      padding: 0 8px;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 440px;
+      margin-bottom: 12px;
+      background: #1a1a26;
+      padding: 12px 8px;
+      border-radius: 16px;
+      border: 1px solid #2d2d42;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .score-item { 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-title { 
+      font-size: 0.62rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px;
+      color: #8888a5; 
+      margin-bottom: 4px;
+    }
+
+    .score-val { 
+      font-size: 1.2rem; 
+      font-weight: 800; 
+      color: #4caf50; 
+      transition: color 0.3s;
+    }
+
+    .progress-container {
+      width: 100%;
+      max-width: 440px;
+      background: #1a1a26;
+      border: 1px solid #2d2d42;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #aaaac0;
+      margin-bottom: 6px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 12px;
+      background: #252538;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #ffca28, #4caf50);
+      border-radius: 6px;
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    }
+
+    .control-card {
+      width: 100%;
+      max-width: 440px;
+      background: #1a1a26;
+      border: 1px solid #2d2d42;
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slider-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #e0e0f0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge {
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 16px;
+      background: rgba(255, 152, 0, 0.2);
+      color: #ff9800;
+      border: 1px solid #ff9800;
+      transition: all 0.2s ease;
+    }
+
+    .badge-purple {
+      background: rgba(171, 71, 188, 0.2);
+      color: #ab47bc;
+      border-color: #ab47bc;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      background: #28283e;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #ffca28;
+      box-shadow: 0 0 10px rgba(255, 202, 40, 0.8);
+      cursor: pointer;
+      border: 3px solid #12121c;
+      transition: transform 0.1s;
+    }
+
+    .range-slider::-webkit-slider-thumb:active {
+      transform: scale(1.25);
+    }
+
+    .info-tag {
+      font-size: 0.74rem;
+      color: #a0a0c0;
+      background: #232334;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border-left: 3px solid #ffca28;
+      text-align: left;
+      line-height: 1.35;
+    }
+
+    .trap-wrapper {
+      perspective: 800px;
+      margin-bottom: 14px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .trap-container {
+      position: relative;
+      width: 210px;
+      height: 210px;
+      background: linear-gradient(145deg, #8a5243, #5a3227);
+      border: 6px solid #3d2018;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.65), inset 0 2px 4px rgba(255,255,255,0.15);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+    }
+
+    .trap-container:active { 
+      transform: scale(0.94); 
+    }
+
+    .metal-bar {
+      position: absolute;
+      top: 14px;
+      width: 160px;
+      height: 125px;
+      border: 8px solid #c8d0d8;
+      border-radius: 14px;
+      transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-origin: bottom center;
+      pointer-events: none;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
+    }
+
+    .trap-spring {
+      position: absolute;
+      bottom: 22px;
+      width: 38px;
+      height: 20px;
+      background: repeating-linear-gradient(90deg, #777, #777 4px, #333 4px, #333 8px);
+      border-radius: 4px;
+      border: 1px solid #222;
+      pointer-events: none;
+    }
+    
+    .cheese-target {
+      font-size: 3.8rem;
+      z-index: 2;
+      pointer-events: none;
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
+    }
+
+    /* Ratoeira Desarmada / Fechada */
+    .trap-container.snapped .metal-bar {
+      transform: rotateX(180deg) translateY(-110px);
+      border-color: #f44336;
+    }
+
+    .trap-container.snapped {
+      border-color: #b71c1c;
+      background: linear-gradient(145deg, #60291e, #401811);
+    }
+
+    body.alert-flash {
+      animation: flashRed 0.35s infinite alternate;
+    }
+
+    @keyframes flashRed {
+      0% { background-color: #12121c; }
+      100% { background-color: #610808; }
+    }
+
+    .shake {
+      animation: shakeAnim 0.3s ease-in-out;
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    .status-msg {
+      font-size: 1rem;
+      font-weight: 700;
+      min-height: 52px;
+      line-height: 1.35;
+      padding: 0 12px;
+      max-width: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-msg.danger { color: #ff5252; }
+    .status-msg.success { color: #69f0ae; }
+    .status-msg.victory { color: #ffd700; text-shadow: 0 0 12px rgba(255, 215, 0, 0.6); }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .btn-reset {
+      padding: 12px 24px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      background: #ffca28;
+      color: #12121c;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 6px 20px rgba(255, 202, 40, 0.4);
+      transition: transform 0.1s, background 0.2s;
+    }
+
+    .btn-reset:active {
+      transform: scale(0.96);
+      background: #ffa000;
+    }
+
+    .btn-audio {
+      background: #232334;
+      border: 1px solid #3d3d56;
+      color: #c0c0e0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    canvas#confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="header-container">
+    <h1>🧀 Corrida do Queijo</h1>
+    <p class="instructions">
+      Ajuste o <strong>Risco Base</strong> e a <strong>Variação Randômica (RNG)</strong> para testar sua sorte e estratégia!
+    </p>
+  </div>
+
+  <!-- Placar principal -->
+  <div class="scoreboard">
+    <div class="score-item">
+      <span class="score-title">Queijos</span>
+      <span class="score-val" id="score">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-title">Risco Base</span>
+      <span class="score-val" id="scoreRisk" style="color:#ff9800;">50%</span>
+    </div>
+    <div class="score-item">
+      <span class="score-title">Risco Efetivo</span>
+      <span class="score-val" id="scoreEffective" style="color:#2196f3;">25%</span>
+    </div>
+    <div class="score-item">
+      <span class="score-title">Meta Limite</span>
+      <span class="score-val" id="scoreLimit" style="color:#4fc3f7;">51</span>
+    </div>
+  </div>
+
+  <!-- Barra de progresso visual -->
+  <div class="progress-container">
+    <div class="progress-header">
+      <span>Progresso da Meta</span>
+      <span id="progressText">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <!-- Card dos dois controles deslizantes -->
+  <div class="control-card">
+    <!-- Slider 1: Risco Base -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-label">1. Risco Base (0% a 100%)</span>
+        <span class="badge" id="riskBadge">50%</span>
+      </div>
+      <input type="range" id="riskSlider" min="0" max="100" value="50" step="1" class="range-slider">
+    </div>
+
+    <!-- Slider 2: Variação Randômica / Volatilidade -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <span class="slider-label">2. Variação Randômica (RNG)</span>
+        <span class="badge badge-purple" id="volatilityBadge">50%</span>
+      </div>
+      <input type="range" id="volatilitySlider" min="0" max="100" value="50" step="1" class="range-slider">
+    </div>
+
+    <div class="info-tag" id="formulaDisplay">
+      <strong>Equilíbrio Ativo:</strong> Com 50% de variação, o risco inicial é de 25% e cresce até 50% conforme você avança rumo à meta de 51 queijos.
+    </div>
+  </div>
+
+  <!-- Ratoeira Interativa -->
+  <div class="trap-wrapper">
+    <div class="trap-container" id="mousetrap">
+      <div class="metal-bar" id="metalBar"></div>
+      <div class="trap-spring"></div>
+      <div class="cheese-target" id="cheese">🧀</div>
+    </div>
+  </div>
+
+  <!-- Status do Jogo -->
+  <div class="status-msg" id="statusMsg">Toque na ratoeira para tentar pegar o queijo!</div>
+
+  <!-- Ações -->
+  <div class="action-buttons">
+    <button class="btn-reset" id="btnReset">Tentar Novamente 🔄</button>
+    <button class="btn-audio" id="btnAudioToggle">🔊 Som On</button>
+  </div>
+
+  <script>
+    let baseRisk = 50;           // Risco Base em %
+    let volatility = 50;         // Variação Randômica / Volatilidade em %
+    let metaLimit = 51;          // Meta de queijos calculada
+    let pontos = 0;              // Queijos coletados
+    let jogoAtivo = true;
+    let audioCtx = null;
+    let audioHabilitado = true;
+
+    // Referências dos Elementos do DOM
+    const riskSlider = document.getElementById('riskSlider');
+    const volatilitySlider = document.getElementById('volatilitySlider');
+    const riskBadge = document.getElementById('riskBadge');
+    const volatilityBadge = document.getElementById('volatilityBadge');
+    const scoreRisk = document.getElementById('scoreRisk');
+    const scoreEffective = document.getElementById('scoreEffective');
+    const scoreLimit = document.getElementById('scoreLimit');
+    const formulaDisplay = document.getElementById('formulaDisplay');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const trapElem = document.getElementById('mousetrap');
+    const statusMsg = document.getElementById('statusMsg');
+    const scoreElem = document.getElementById('score');
+    const btnReset = document.getElementById('btnReset');
+    const cheeseElem = document.getElementById('cheese');
+    const btnAudioToggle = document.getElementById('btnAudioToggle');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+
+    function obterAudioContext() {
+      if (!audioHabilitado) return null;
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function vibrar(ms = 50) {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate(ms); } catch(e) {}
+      }
+    }
+
+    function tocarSomSucesso() {
+      try {
+        const ctx = obterAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (e) {
+        console.log("Áudio bloqueado ou indisponível:", e);
+      }
+    }
+
+    function tocarSomVitoria() {
+      try {
+        const ctx = obterAudioContext();
+        if (!ctx) return;
+        const notas = [523.25, 659.25, 783.99, 1046.50];
+        notas.forEach((freq, idx) => {
+          setTimeout(() => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.35, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.28);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.28);
+          }, idx * 110);
+        });
+      } catch (e) {
+        console.log("Áudio bloqueado:", e);
+      }
+    }
+
+    function tocarAlertaSonoro() {
+      try {
+        const ctx = obterAudioContext();
+        if (!ctx) return;
+        
+        // Som metálico de estalo
+        const oscSnap = ctx.createOscillator();
+        const gainSnap = ctx.createGain();
+        oscSnap.type = 'sawtooth';
+        oscSnap.frequency.setValueAtTime(160, ctx.currentTime);
+        oscSnap.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.1);
+        gainSnap.gain.setValueAtTime(1, ctx.currentTime);
+        gainSnap.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+        oscSnap.connect(gainSnap);
+        gainSnap.connect(ctx.destination);
+        oscSnap.start();
+        oscSnap.stop(ctx.currentTime + 0.1);
+
+        // Sirene de perigo
+        setTimeout(() => {
+          const oscSiren = ctx.createOscillator();
+          const gainSiren = ctx.createGain();
+          oscSiren.type = 'square';
+          oscSiren.frequency.setValueAtTime(950, ctx.currentTime);
+          oscSiren.frequency.setValueAtTime(450, ctx.currentTime + 0.15);
+          oscSiren.frequency.setValueAtTime(950, ctx.currentTime + 0.3);
+          gainSiren.gain.setValueAtTime(0.35, ctx.currentTime);
+          gainSiren.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+          oscSiren.connect(gainSiren);
+          gainSiren.connect(ctx.destination);
+          oscSiren.start();
+          oscSiren.stop(ctx.currentTime + 0.45);
+        }, 70);
+      } catch (e) {
+        console.log("Áudio bloqueado:", e);
+      }
+    }
+
+    // Meta de queijos = Fórmula Linear Estrita: Math.max(1, Math.round(100 - (0.99 * risco)))
+    function calcularMetaLinear(risco) {
+      return Math.max(1, Math.round(100 - (0.99 * risco)));
+    }
+
+    // Cálculo do Risco Efetivo dinâmico com base no progresso e volatilidade
+    function calcularRiscoEfetivo() {
+      const progresso = metaLimit > 0 ? (pontos / metaLimit) : 0;
+      const vFrac = volatility / 100;
+      const rBaseFrac = baseRisk / 100;
+
+      // Fator de volatilidade: com vFrac = 1, risco é constante (100% aleatório)
+      // com vFrac < 1, risco começa menor e cresce progressivamente conforme se aproxima da meta
+      const fatorProgresso = vFrac + (1 - vFrac) * progresso;
+      const riscoEfetivoFrac = rBaseFrac * fatorProgresso;
+
+      return Math.min(100, Math.max(0, riscoEfetivoFrac * 100));
+    }
+
+    function atualizarBarraProgresso() {
+      const pct = Math.min(100, Math.round((pontos / metaLimit) * 100));
+      progressFill.style.width = `${pct}%`;
+      progressText.innerText = `${pct}%`;
+    }
+
+    function atualizarInterface() {
+      baseRisk = parseInt(riskSlider.value);
+      volatility = parseInt(volatilitySlider.value);
+      metaLimit = calcularMetaLinear(baseRisk);
+
+      const riscoEfetivo = calcularRiscoEfetivo();
+
+      riskBadge.innerText = `${baseRisk}%`;
+      volatilityBadge.innerText = `${volatility}%`;
+      scoreRisk.innerText = `${baseRisk}%`;
+      scoreEffective.innerText = `${Math.round(riscoEfetivo)}%`;
+      scoreLimit.innerText = metaLimit;
+
+      // Explicação técnica da mecânica
+      if (volatility === 100) {
+        formulaDisplay.innerHTML = `<strong>RNG Puro (100% Variação):</strong> O risco de cada clique é constante em <strong>${baseRisk}%</strong>.`;
+      } else {
+        const riscoInicial = Math.round(baseRisk * (volatility / 100));
+        formulaDisplay.innerHTML = `<strong>Risco Suavizado (${volatility}% Variação):</strong> Começa em <strong>${riscoInicial}%</strong> no 1º clique e sobe até <strong>${baseRisk}%</strong> na meta de <strong>${metaLimit}</strong> queijos.`;
+      }
+
+      // Ajusta cor do badge conforme a dificuldade do risco base
+      let cor = '#4caf50';
+      if (baseRisk >= 75) cor = '#f44336';
+      else if (baseRisk >= 45) cor = '#ff9800';
+      else if (baseRisk >= 20) cor = '#ffca28';
+
+      riskBadge.style.color = cor;
+      riskBadge.style.borderColor = cor;
+      scoreRisk.style.color = cor;
+
+      atualizarBarraProgresso();
+
+      if (jogoAtivo && pontos >= metaLimit && pontos > 0) {
+        testarVitoria();
+      }
+    }
+
+    function tentarPegarQueijo() {
+      obterAudioContext(); // Desbloqueia contexto de áudio em gestos de toque
+      if (!jogoAtivo) return;
+
+      const riscoEfetivoPct = calcularRiscoEfetivo();
+      const probabilidadeSorteio = riscoEfetivoPct / 100;
+      const sorteio = Math.random();
+
+      if (sorteio < probabilidadeSorteio) {
+        // --- CAPTURADO (RATOEIRA DESARMA) ---
+        jogoAtivo = false;
+        trapElem.classList.add('snapped');
+        document.body.classList.add('alert-flash');
+        document.body.classList.add('shake');
+        
+        vibrar([100, 50, 100]);
+        tocarAlertaSonoro();
+
+        statusMsg.className = "status-msg danger";
+        statusMsg.innerHTML = `💥 CLACK! A RATOEIRA FECHOU! 💥<br>Você foi pego no ${pontos + 1}º clique!`;
+        btnReset.style.display = "inline-block";
+        btnReset.innerText = "Tentar Novamente 🔄";
+
+        setTimeout(() => document.body.classList.remove('shake'), 300);
+      } else {
+        // --- SUCESSO AO PEGAR O QUEIJO ---
+        pontos++;
+        scoreElem.innerText = pontos;
+        vibrar(30);
+        atualizarInterface();
+
+        if (pontos >= metaLimit) {
+          testarVitoria();
+        } else {
+          tocarSomSucesso();
+          statusMsg.className = "status-msg success";
+          statusMsg.innerText = `🧀 Queijo coletado! (${pontos}/${metaLimit} para a meta)`;
+
+          cheeseElem.style.transform = "scale(1.3) rotate(12deg)";
+          setTimeout(() => cheeseElem.style.transform = "scale(1) rotate(0deg)", 140);
+        }
+      }
+    }
+
+    function testarVitoria() {
+      jogoAtivo = false;
+      tocarSomVitoria();
+      vibrar([80, 40, 80, 40, 150]);
+      
+      statusMsg.className = "status-msg victory";
+      statusMsg.innerHTML = `🏆 VITÓRIA INCRÍVEL!<br>Alcançou a meta de ${metaLimit} queijos com ${baseRisk}% de risco!`;
+      btnReset.innerText = "Jogar Novamente 🏆";
+      btnReset.style.display = "inline-block";
+
+      dispararConfetes();
+    }
+
+    function reiniciarJogo() {
+      pontos = 0;
+      jogoAtivo = true;
+      scoreElem.innerText = "0";
+      
+      trapElem.classList.remove('snapped');
+      document.body.classList.remove('alert-flash', 'shake');
+      
+      statusMsg.className = "status-msg";
+      statusMsg.innerText = "Toque na ratoeira para tentar pegar o queijo!";
+      btnReset.style.display = "none";
+
+      atualizarInterface();
+    }
+
+    function dispararConfetes() {
+      const ctx = confettiCanvas.getContext('2d');
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+
+      const particulas = [];
+      const cores = ['#ffca28', '#4caf50', '#2196f3', '#e91e63', '#ab47bc'];
+
+      for (let i = 0; i < 70; i++) {
+        particulas.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+          vx: (Math.random() - 0.5) * 12,
+          vy: (Math.random() - 0.7) * 14,
+          size: Math.random() * 8 + 4,
+          color: cores[Math.floor(Math.random() * cores.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 10
+        });
+      }
+
+      let frames = 0;
+      function animar() {
+        ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        particulas.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.3; // gravidade
+          p.rotation += p.vRot;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frames++;
+        if (frames < 120) {
+          requestAnimationFrame(animar);
+        } else {
+          ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        }
+      }
+      animar();
+    }
+
+    riskSlider.addEventListener('input', atualizarInterface);
+    volatilitySlider.addEventListener('input', atualizarInterface);
+
+    // Usa 'pointerdown' para resposta instantânea em telas touch sem os 300ms de delay
+    trapElem.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      tentarPegarQueijo();
+    });
+
+    btnReset.addEventListener('click', reiniciarJogo);
+
+    btnAudioToggle.addEventListener('click', () => {
+      audioHabilitado = !audioHabilitado;
+      btnAudioToggle.innerText = audioHabilitado ? "🔊 Som On" : "🔇 Som Off";
+      if (audioHabilitado) obterAudioContext();
+    });
+
+    // Redimensionamento de tela
+    window.addEventListener('resize', () => {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    });
+
+    // Inicialização ao carregar a página
+    window.onload = () => {
+      atualizarInterface();
+    };
+  </script>
+</body>
+</html>
